@@ -1,0 +1,7 @@
+---
+default_set: 'windows_2008_r2'
+sets:
+  'windows_2008_r2':
+    nodes:
+      'main.foo.vm':
+         prefab: 'windows_2008_r2'

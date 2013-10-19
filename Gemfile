@@ -16,3 +16,7 @@ if puppetversion =~ /2\.7/
   gem "hiera"
   gem "hiera-puppet"
 end
+
+gem "rspec-system"
+gem "rspec-system-puppet"
+gem "rspec-system-serverspec"

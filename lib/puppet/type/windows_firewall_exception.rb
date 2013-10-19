@@ -12,23 +12,19 @@ Puppet::Type.newtype(:windows_firewall_exception) do
   newparam(:display_name, :namevar => true) do
     desc "The unique name that is displayed to indentify this exception"
 
-    #TODO: test if this regex is correct or too restrictive
-    #TODO: is the display name actually unique?
-    #TODO: test the maximum number of characters
+    #TODO: the display name is not actually unique - what is unique?
+    #TODO: how to exclude the | and \ characters from this regex
 
     validate do |display_name|
-      fail("Invalid display_name #{display_name}") unless value =~ /^[A-Za-z-]+$/
+      fail("Invalid display_name #{display_name}") unless value =~ /^[.*]+$/
     end
   end
 
   newparam(:description) do
     desc "A freeform text description explaining the purpose of this exception."
 
-    #TODO: test the allowed characters for this regex
-    #TODO: test the maximum number of characters
-
     validate do |description|
-      fail("Invalid description #{description}") unless value =~ /^[A-Za-z0-9-]+$/
+      fail("Invalid description #{description}") unless value =~ /^[.*]+$/
     end
   end
 
@@ -73,6 +69,7 @@ Puppet::Type.newtype(:windows_firewall_exception) do
     end
   end
 
+  #TODO: this needs to be munged to "yes or no"
   newparam(:enabled, :boolean => true) do
     desc "The status of the exception, indicating if exception is active or not"
 

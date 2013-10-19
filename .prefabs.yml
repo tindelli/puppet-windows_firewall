@@ -1,0 +1,18 @@
+---
+'windows_2008_r2':
+  description: ""
+  facts:
+    kernelrelease: "6.1.7600"
+    operatingsystem: "windows"
+    kernelmajversion: "6.1"
+    architecture: x86_64
+    facterversion: "1.6.18"
+    kernelversion: "6.1.7600"
+    operatingsystemrelease: "6.1.7600"
+    osfamily: "windows"
+    kernel: "windows"
+    rubyversion: "1.8.7"
+  provider_specifics:
+    vagrant:
+      box: 'windows_2008_r2'
+      box_url: '~/vagrant-boxes/windows_2008_r2_virtualbox/windows_2008_r2_virtualbox.box'

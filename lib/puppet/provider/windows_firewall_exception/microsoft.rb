@@ -1,5 +1,6 @@
 require 'puppet/type'
 
+#TODO: add support for windows xp + server 2003
 Puppet::Type.type(:windows_firewall_exception).provide(:microsoft) do
 
   defaultfor :operatingsystem => :windows
@@ -14,11 +15,7 @@ Puppet::Type.type(:windows_firewall_exception).provide(:microsoft) do
 
   def exists?
     Puppet.debug("Checking the existence of firewall exception value: #{self}")
-    found = false
-    begin
-      #TODO:
-    end
-    found
+    netsh("advfirewall firewall show rule name=\"#{resource[:name]}\"").zero?
   end
 
   def create
