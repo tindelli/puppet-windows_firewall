@@ -12,11 +12,8 @@ Puppet::Type.newtype(:windows_firewall_exception) do
   newparam(:display_name, :namevar => true) do
     desc "The unique name that is displayed to indentify this exception"
 
-    #TODO: the display name is not actually unique - what is unique?
-    #TODO: how to exclude the | and \ characters from this regex
-
     validate do |display_name|
-      fail("Invalid display_name #{display_name}") unless value =~ /^[.*]+$/
+      fail("Invalid display_name #{display_name}") unless display_name.is_a? String
     end
   end
 
@@ -24,7 +21,7 @@ Puppet::Type.newtype(:windows_firewall_exception) do
     desc "A freeform text description explaining the purpose of this exception."
 
     validate do |description|
-      fail("Invalid description #{description}") unless value =~ /^[.*]+$/
+      fail("Invalid description #{description}") unless description.is_a? String
     end
   end
 
@@ -62,14 +59,13 @@ Puppet::Type.newtype(:windows_firewall_exception) do
       as a integer in the range: "
 
     validate do |local_port|
-     fail("Invalid port #{port}") unless value =~ /[0-9]{1,5}/
+     fail("Invalid port #{local_port}") unless local_port =~ /[0-9]{1,5}/
     end
     munge do |local_port|
        Integer(local_port)
     end
   end
 
-  #TODO: this needs to be munged to "yes or no"
   newparam(:enabled, :boolean => true) do
     desc "The status of the exception, indicating if exception is active or not"
 
@@ -90,9 +86,9 @@ Puppet::Type.newtype(:windows_firewall_exception) do
     munge do |value|
       case value
         when true, /^true$/i, :true
-          true
+          "yes"
         else
-          false
+          "no"
       end
     end
   end

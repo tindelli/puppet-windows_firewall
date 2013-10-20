@@ -6,7 +6,6 @@ Puppet::Type.type(:windows_firewall_exception).provide(:microsoft) do
   defaultfor :operatingsystem => :windows
   confine    :operatingsystem => :windows
 
-  #TODO: using the path directly doesn't seem right
   commands :netsh => 'C:\\Windows\\System32\\netsh.exe'
 
   def self.instances
@@ -15,17 +14,21 @@ Puppet::Type.type(:windows_firewall_exception).provide(:microsoft) do
 
   def exists?
     Puppet.debug("Checking the existence of firewall exception value: #{self}")
-    netsh("advfirewall firewall show rule name=\"#{resource[:name]}\"").zero?
+    args = ["advfirewall", "firewall", "show", "rule", "name=\"#{resource[:name]}\""]
+    exists = false
+    begin
+      check = netsh args
+      exists = check.zero?
+    rescue
+      #netsh returns "No rules match specified criteria" with exit code 1
+      exists = false
+    end
+
+    exists
   end
 
   def create
     Puppet.debug("Creating firewall exception: #{self}")
-    netsh gen_args
-  end
-
-  def flush
-    Puppet.debug("Flushing firewall exception: #{self}")
-    return if resource[:ensure] == :absent
     netsh gen_args
   end
 
@@ -42,10 +45,12 @@ Puppet::Type.type(:windows_firewall_exception).provide(:microsoft) do
       fw_action = 'add'
     end
 
-    args = "advfirewall firewall #{fw_action} rule "
-    args << "name=\"#{resource[:name]}\" description=\"#{resource[:description]}\" "
-    args << "dir=#{direction} action=#{resource[:action]} enable=#{resource[:enabled]} "
-    args << "protocol=#{resource[:protocol]} localport=#{resource[:local_port]}"
+    args = [ "advfirewall", "firewall", fw_action, "rule",
+             "name=\"#{resource[:name]}\"", "description=\"#{resource[:description]}\"",
+             "dir=#{resource[:direction]}", "action=#{resource[:action]}", "enable=#{resource[:enabled]}",
+             "protocol=#{resource[:protocol]}", "localport=#{resource[:local_port]}"
+           ]
+    args
   end
 
 end
