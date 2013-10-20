@@ -25,13 +25,13 @@ Puppet::Type.newtype(:windows_firewall_exception) do
     end
   end
 
-  #newparam(:program) do
-  #  desc ""
-  #
-  #  validate do |program|
-  #
-  #  end
-  #end
+  newparam(:program) do
+    desc "The full path location of the exe that should be included in the exception rule"
+
+    validate do |program|
+      fail("Invalid program #{program}") unless program =~ /#{ENV['HOMEDRIVE']}:\/([\w]*\/)*[\w]*.exe/
+    end
+  end
 
   newparam(:action) do
     desc "The intended purpose of this exception, either allow or block."

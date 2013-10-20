@@ -6,7 +6,7 @@ Puppet::Type.type(:windows_firewall_exception).provide(:microsoft) do
   defaultfor :operatingsystem => :windows
   confine    :operatingsystem => :windows
 
-  commands :netsh => 'C:\\Windows\\System32\\netsh.exe'
+  commands :netsh => "#{ENV['SYSTEMROOT']}\\System32\\netsh.exe"
 
   def self.instances
     []
@@ -14,6 +14,7 @@ Puppet::Type.type(:windows_firewall_exception).provide(:microsoft) do
 
   def exists?
     Puppet.debug("Checking the existence of firewall exception value: #{self}")
+    #TODO: test this for windows 2003
     args = ["advfirewall", "firewall", "show", "rule", "name=\"#{resource[:name]}\""]
     exists = false
     begin
@@ -29,28 +30,74 @@ Puppet::Type.type(:windows_firewall_exception).provide(:microsoft) do
 
   def create
     Puppet.debug("Creating firewall exception: #{self}")
-    netsh gen_args
+    netsh generate_arguments
   end
 
   def destroy
     Puppet.debug("Destroying firewall exception: #{self}")
-    netsh gen_args
+    netsh generate_arguments
   end
 
-  def gen_args
+  #TODO: refactor this out into two classes within the PuppetX namespace
+  def generate_arguments
 
-    if resource[:ensure] == :absent
-      fw_action = 'delete'
+    resource[:ensure] == :absent ? fw_action = 'delete' : fw_action = 'add'
+
+    if (discover_os =~ /Windows Server 2003/) or (discover_os =~ /Windows XP/)
+
+      resource[:enabled] = 'yes' ? mode = 'ENABLED' : mode = 'DISABLED'
+
+      args = [ "firewall", fw_action]
+
+      if resource[:program].empty?
+        fw_command = 'portopening'
+
+      else
+        fw_command = 'allowedprogram'
+      end
+
+      args.concat([fw_command, "name=\"#{resource[:name]}\"", "mode=#{mode}", "enable=#{resource[:enabled]}"])
+
+      if resource[:program].empty?
+        args.concat(["protocol=#{resource[:protocol]}", "port=#{resource[:local_port]}"])
+      else
+        args.concat(["program=#{resource[:program]}"])
+      end
     else
-      fw_action = 'add'
+      args = [ "advfirewall", "firewall", fw_action, "rule",
+               "name=\"#{resource[:name]}\"", "description=\"#{resource[:description]}\"",
+               "dir=#{resource[:direction]}", "action=#{resource[:action]}", "enable=#{resource[:enabled]}"
+             ]
+
+      if resource[:program].empty?
+        args.concat(["protocol=#{resource[:protocol]}", "local_port=#{resource[:local_port]}"])
+      else
+        args.concat(["program=#{resource[:program]}"])
+      end
     end
 
-    args = [ "advfirewall", "firewall", fw_action, "rule",
-             "name=\"#{resource[:name]}\"", "description=\"#{resource[:description]}\"",
-             "dir=#{resource[:direction]}", "action=#{resource[:action]}", "enable=#{resource[:enabled]}",
-             "protocol=#{resource[:protocol]}", "localport=#{resource[:local_port]}"
-           ]
     args
+  end
+
+  #TODO: pull this out to PuppetX ?
+  def discover_os
+    require 'win32/registry'
+
+    operatingsystemversion = "unknown"
+    begin
+      require 'win32/registry'
+
+      Win32::Registry::HKEY_LOCAL_MACHINE.open('Software\Microsoft\Windows NT\CurrentVersion') do |reg|
+        reg.each do |name,type,data|
+          if name.eql?("ProductName")
+            operatingsystemversion = data
+          end
+        end
+      end
+    rescue
+
+    end
+    operatingsystemversion
   end
 
 end
