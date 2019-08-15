@@ -81,13 +81,26 @@ define windows_firewall::exception(
   Enum['in', 'out'] $direction = 'in',
   Enum['allow', 'block'] $action = 'allow',
   Boolean $enabled = true,
-  Optional[Enum['TCP', 'UDP', 'ICMPv4', 'ICMPv6']] $protocol = undef,
-  Optional[Variant[Integer[1, 65535], Enum['any']]] $local_port = undef,
-  Optional[Variant[Integer[1, 65535], Enum['any']]] $remote_port = undef,
-  Optional[String] $remote_ip = undef,
+  Optional[
+    Enum['TCP', 'UDP', 'ICMPv4', 'ICMPv6']
+  ] $protocol = undef,
+  Optional[
+    Variant[
+      Integer[1, 65535],
+      Enum['any','RPC','RPC-EPMap'],
+      Pattern[/\A[1-9]{1}\Z|[1-9]{1}[0-9,-]*[0-9]{1}\Z/]
+    ]
+  ] $local_port = undef,
+  Optional[
+    Variant[
+      Integer[1, 65535],
+      Enum['any'],
+      Pattern[/\A[1-9]{1}\Z|[1-9]{1}[0-9,-]*[0-9]{1}\Z/]
+    ]
+  ] $remote_port = undef,
   Optional[String] $program = undef,
   String[0, 255] $display_name = '',
-  String $description = '',
+  String $description = 'windows_firewall::exception generated rule',
   Boolean $allow_edge_traversal = false,
 ) {
 
