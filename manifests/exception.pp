@@ -98,6 +98,7 @@ define windows_firewall::exception(
       Pattern[/\A[1-9]{1}\Z|[1-9]{1}[0-9,-]*[0-9]{1}\Z/]
     ]
   ] $remote_port = undef,
+  Optional[String] $remote_ip = undef,
   Optional[String] $program = undef,
   String[0, 255] $display_name = '',
   String $description = 'windows_firewall::exception generated rule',
